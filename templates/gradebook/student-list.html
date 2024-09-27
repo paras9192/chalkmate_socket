@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gradebook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      div,
+      dl,
+      dt,
+      dd,
+      ul,
+      ol,
+      li,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      pre,
+      form,
+      fieldset,
+      input,
+      textarea,
+      p,
+      blockquote,
+      th,
+      td {
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+      }
+
+      .header {
+        display: flex;
+        margin-bottom: 3.75rem;
+        justify-content: space-between;
+      }
+
+      .left_container{
+        padding: 16px 40px 34px 16px; 
+        border-radius: 10px; 
+        border: 0.6px solid #EBEFF6;
+        background-image: url("https://chalkmates.s3.us-west-2.amazonaws.com/Image/gradient-box-long.svg");
+        background-repeat: no-repeat;
+        background-size: cover;
+      } 
+
+      .total_students_count {
+        font-family: Inter;
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 14px;
+        margin-top: .75rem;
+      }
+
+      .class_name {
+        color: #19213d;
+        font-family: Inter;
+        font-size: 2rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 2.25rem;
+      }
+
+      .class_title {
+        color: #19213d;
+        font-family: Inter;
+        font-size: 2rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 2.25rem;
+
+      }
+
+      .contact_label,
+      .mail_label {
+        color: #868da6;
+
+        /* Text single/100/Regular */
+        font-family: Inter;
+        font-size: 8px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 12px; /* 150% */
+      }
+      .contact_number,
+      .mail_id {
+        color: #19213d;
+
+        /* Text single/200/Semi Bold */
+        font-family: Inter;
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 14px; /* 140% */
+        margin-bottom: 8px;
+      }
+      .header > .logo > img {
+        width: 71px;
+        height: 82px;
+      }
+      .left > p {
+        margin-top: 8px;
+      }
+      .status_card {
+        display: flex;
+        justify-content: space-between;
+        border-radius: 12px;
+        border: 0.6px solid #ebeff6;
+        background: #fff;
+        padding: 20px 25px;
+        margin-bottom: 2.5rem;
+
+        /* Card White */
+        box-shadow: 0px 1px 3px 0px rgba(25, 33, 61, 0.05),
+          0px 2px 8px 0px rgba(25, 33, 61, 0.04);
+      }
+      .status_asg_quiz {
+        border-radius: 12px;
+        border: 0.6px solid #ebeff6;
+        background: #f6f8fc;
+        /* padding: 16px 16px 32px 16px; */
+        padding: 1rem 1.5rem;
+        width: 100%;
+        margin-right: 1.75rem;
+      }
+      .status_card > .status_asg_quiz > .subheading {
+        display: flex;
+        margin-bottom: 1.5rem;
+      }
+      .status_card > .status_asg_quiz > .subheading > img {
+        width: 16px;
+        margin-right: 8px;
+      }
+      .status_card > .status_asg_quiz > .subheading > span {
+        color: #19213d;
+
+        font-family: Inter;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 16px; /* 100% */
+      }
+      .status_asg_quiz {
+        color: #363636;
+
+        font-family: Inter;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 16px; /* 100% */
+        text-align: justify;
+      }
+
+      .status_total {
+        border-radius: 12px;
+        border: 0.6px solid #ebeff6;
+        background-image: url("https://chalkmates.s3.us-west-2.amazonaws.com/Image/Gradient-box.svg");
+        background-size: cover;
+        background-position: left;
+        background-repeat: no-repeat;
+        padding: 2rem 1.5rem;
+        width: 100%;
+      }
+
+      .status_total > .label {
+        color: #fff;
+
+        font-family: Inter;
+        font-size: 1.2rem;
+        font-style: normal;
+        font-weight: 600;
+        /* white-space: break-spaces; */
+        margin-bottom: 0.625rem;
+        line-height: 1rem;
+      }
+
+      .status_total > .grade {
+        color: #fff;
+
+        font-family: Inter;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 1.25rem;
+      }
+      /* .watermark_container {
+        background-image: url("./images/Watermark.svg");
+        background-size: cover;
+        padding-bottom: 2rem;
+        width: 100%;
+        height: 100%;
+        background-position: left;
+      } */
+      /* body {
+        background-image: url("./images/Watermark.svg");
+        background-size: cover;
+        
+        width: 100vw;
+        height: 100vh;
+        background-position: left;
+        background-repeat: no-repeat;
+      } */
+      /* .gradient-logo {
+        background-image: url("./images/Background Gradient pdf.svg");
+        background-size: cover;
+        padding-bottom: 4.6875rem;
+        background-repeat: no-repeat;
+        background-position: top;
+      } */
+      .table_container table {
+        background-color: #f6f8fc;
+        border-radius: 12px;
+        width: 100%;
+        /* margin-bottom: 1rem; */
+      }
+      .table_container th {
+        color: #868da6;
+        text-align: center;
+        font-family: Inter;
+        font-size: 0.75rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 10px; /* 100% */
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        /* padding: 1rem; */
+        line-height: 1.2rem;
+        white-space: break-spaces;
+      }
+      .table_container td {
+        color: #19213d;
+
+        font-family: Inter;
+        font-size: 0.625rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 1.2rem; /* 175% */
+        padding: 0.5rem 1rem;
+
+        text-align: center;
+        border-collapse: collapse;
+      }
+      .table_container th,
+      .table_container table {
+        border-collapse: collapse;
+      }
+
+      .table_container td:not(:last-child) {
+        border-right: 1px solid #868da6;
+        border-collapse: collapse;
+      }
+      .table_container tr:last-of-type > td {
+        padding-bottom: 1rem;
+      }
+      .table_container {
+        padding: 0.75rem;
+        border-radius: 12px;
+        background-color: #f6f8fc;
+      }
+
+      .status_asg_quiz td {
+        text-align: left;
+        width: 50%;
+      }
+      .status_asg_quiz td:not(:last-child) {
+        padding-right: 8px;
+      }
+      .main {
+        margin: 60px 85px 0 85px;
+      }
+
+      body {
+        background-image: url("https://chalkmates.s3.us-west-2.amazonaws.com/Image/Background_gradient.svg"),
+          url("https://chalkmates.s3.us-west-2.amazonaws.com/Image/Watermark.svg");
+        background-repeat: no-repeat, no-repeat;
+        background-position: top right, left bottom;
+        background-size: 100vw, contain;
+        height: 100vh;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      /* .watermark_container {
+        background-image: url("./images/Watermark.svg");
+        background-size: contain;
+        padding-bottom: 2rem;
+        width: 100%;
+        height: 75vh;
+        background-position: left bottom;
+        background-repeat: no-repeat;
+      } */
+      .footer {
+        padding-left: 85px;
+        padding-right: 85px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: auto;
+      }
+      .footer_left {
+        width: 100px;
+        height: 19px;
+      }
+      .footer_right {
+        width: 18%;
+        background-color: #ffcfd0;
+      }
+      @page {
+        margin: 0;
+        size: A4;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="main">
+      <div class="gradient-logo">
+        <div class="header">
+          <div class="left_container">
+            <p class="class_name">Class - <span class="class_title">{{class_obj.name}}<span></p>
+            <p class="total_students_count">Total Students - {{total_students}}</p>
+          </div>          
+          <div class="logo">
+            <img alt="logo" src="https://chalkmates.s3.us-west-2.amazonaws.com/Image/logo_yucampus.svg" />
+          </div>
+        </div>
+      </div>
+
+      <div class="watermark_container">
+        <div class="table_container">
+          <table>
+            <tr>
+              <th>S.No.</th>
+              <th>Student Name</th>
+              <th>Assignments</th>
+              <th>Quizzes</th>
+              <th>Average</th>
+            </tr>
+
+            {% for student_obj in students_data %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>{{student_obj.name}}</td>
+              <td>{{student_obj.asg_percentage}} %</td>
+              <td>{{student_obj.quiz_percentage}} %</td>
+              <td>{{student_obj.avg_score}} %</td>
+            </tr>            
+            {% endfor %}
+
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+    </div>
+  </body>
+</html>

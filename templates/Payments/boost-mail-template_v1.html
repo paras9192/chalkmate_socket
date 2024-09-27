@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<title></title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+    .table_container table {
+        background-color: #F2F2F2;
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+      }
+      .table_container th {
+        border-bottom: 2px solid #FDFDFD;
+        padding: .75rem;
+        color: #000;
+        font-family: Montserrat;
+        font-size: 1.05rem;
+        font-style: normal;
+        font-weight: 600;
+      }
+      .table_container {
+        color: #19213d;
+        
+        font-family: Inter;
+        font-size: .625rem;
+        font-style: normal;
+        font-weight: 600;
+        
+        text-align: center;
+        border-collapse: collapse;
+    }
+    .table_container td {
+        padding: .75rem 1.25rem;
+        color: #7A7A7A;
+        font-family: Montserrat;
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 500;
+    }
+    .table_container td:nth-last-of-type() {
+        border-bottom: 2px solid #FDFDFD;
+    }
+    .table_container th:first-child, .table_container td:first-child{
+        border-right: 2px solid #FDFDFD;
+    }
+    .table_container .total {       
+        border-top: 2px solid #FDFDFD; 
+    color: #020202;
+    font-family: Montserrat;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 600;     
+    text-align: right;  
+    padding: .625rem;
+    padding-right: 1.5rem;                             
+    }
+</style>
+</head>
+<body>
+    <div style="background-color: rgb(248, 248, 248); width: 100%; ">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center">
+                <img alt="Your Logo" src="https://chalkmates.s3.us-west-2.amazonaws.com/Logo-mailers.png" style="height: auto; min-width: 200px; margin-top: 30px;">
+                <div style="max-width: 800px; padding: 10px;">
+                <div style="height: 0.625rem ; margin-top: 20px; background-color: rgb(237, 30, 36); border-radius: 20px 20px 0 0;">
+                    <!-- <img alt="Welcome" src="../assets/Vector.png" style="height: auto; max-width: 400px; margin: 30px auto;"> -->
+                    <!-- <div style="font-size: 34px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: white; padding-bottom: 20px;">Password Reset!</div> -->
+                </div>
+                <div style="background-color: white; padding-bottom: 2.5rem;">
+                    <div style="max-width: 530px;">
+                        <div style="color:rgb(60, 60, 60); font-size: 18px; font-weight: 500; font-family: 'Montserrat', sans-serif; opacity: 0.7; padding: 30px 0px 10px 0; text-align: left; line-height:28px">
+                            Hi {{user_name}}, <br>
+                            Your {% if post_classification %} Profile  {% else %} Post{% endif %} <span style="color: rgb(237, 30, 36); font-weight: 600">{% if post_classification == 'PROFILE' %}, {% else %}{{post_title}} {% endif %} </span> has been boosted.<br>
+                        </div>
+                        {% comment %} <!-- <div align="left" style="border: 1px solid rgb(233, 233, 233); max-width: 100%; border-radius: 10px; margin: 20px 0; padding: 20px;">
+                            <div style="font-size: 18px; font-weight: 600; font-family: 'Montserrat', sans-serif; padding: 10px 0; display: flex; justify-content: space-between;">
+                            </div>
+                            <hr style="border: 1px solid rgb(233, 233, 233)">
+                            <div style="font-size: 18px; font-weight: 600; font-family: 'Montserrat', sans-serif; padding: 10px 0; display: flex; justify-content: space-between;">
+                            </div>
+                            <hr style="border: 1px solid rgb(233, 233, 233)">
+                            <div style="font-size: 18px; font-weight: 600; font-family: 'Montserrat', sans-serif; padding: 10px 0; display: flex; justify-content: space-between;">
+                            </div>
+                        </div> --> {% endcomment %}
+                        
+                        <!-- Table -->
+                        <div class="table_container" >                            
+                            <table>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                </tr>
+                                <tr>
+                                    <td><span style="margin-right: 0.5rem; color: #000;">{% if post_classification == 'PROFILE' %} Profile {% else %}Post {% endif %}:</span> {{post_title}}</td>
+                                    <td>{{price}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="total" >Total:{{currency}} {{price}}</td>                                    
+                                </tr>
+                            </table>
+                        </div>
+
+                    </div>
+                    <a href="https://www.yucampus.com/">
+                        <button href="https://www.yucampus.com/" style="background-color: rgb(237, 30, 36); font-size: 18px; font-weight: 600; font-family: 'Montserrat', sans-serif; color: white; border: none; padding: 15px 60px; margin: 20px 0; border-radius: 30px; text-transform: uppercase; cursor: pointer;">
+                            view post
+                        </button>
+                    </a>                    
+                </div>
+                <div style="background-color: rgb(237, 30, 36); border-radius: 0 0 20px 20px; height: 0.625rem; margin-bottom: 40px; "></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+    </div>
+</body>
+</html>
