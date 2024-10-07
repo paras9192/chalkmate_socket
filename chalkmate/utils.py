@@ -1,7 +1,6 @@
 from rest_framework import status
 import requests
 from django.core.cache import cache
-from django.conf import settings
 # from apps.translations.utils import TRANSLATION_MODEL_COLUMNS
 # from apps.translations.models import Language
 from django.core.cache import cache

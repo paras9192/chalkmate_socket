@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 import base64
 from apps.accounts.models import User
 import requests
+from django.conf import settings
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -205,21 +206,12 @@ class ChatConsumer(WebsocketConsumer):
         
     def call_channel_subscription_api(self, user_id):
         # Define the base URL for your API
-        base_url = "http://127.0.0.1:8000"
-        endpoint = f"{base_url}/api/v1/chat/channel-subscriptions/"
-
-        payload = {
-            "user_id": user_id
-        }
-
-        # headers = {
-        #     "Authorization": f"Bearer {self.get_token()}",  # Replace with actual token logic
-        #     "Content-Type": "application/json"
-        # }
-
+        
+        base_url = settings.BACKEND_SERVER_URL
+        endpoint = f"{base_url}/api/v1/chat/channel-subscriptions/?user_id={user_id}"
         # Make the API call
         try:
-            response = requests.get(endpoint, json=payload)
+            response = requests.get(endpoint)
 
             if response.status_code == 200:
                 json_response = response.json()
@@ -229,20 +221,8 @@ class ChatConsumer(WebsocketConsumer):
         except requests.exceptions.RequestException as e:
             print(f"Error while calling channel subscription API: {e}")
     def call_get_subscription_api(self, channel_id):
-        # Define the base URL for your API
-        base_url = "http://127.0.0.1:8000"
+        base_url = settings.BACKEND_SERVER_URL
         endpoint = f"{base_url}/api/v1/chat/channel-subscriptions/by_channel?channel_id={channel_id}"
-
-        # payload = {
-        #     "user_id": user_id
-        # }
-
-        # headers = {
-        #     "Authorization": f"Bearer {self.get_token()}",  # Replace with actual token logic
-        #     "Content-Type": "application/json"
-        # }
-
-        # Make the API call
         try:
             response = requests.get(endpoint, json={})
 
