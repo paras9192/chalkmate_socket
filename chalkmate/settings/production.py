@@ -2,8 +2,9 @@ from .base import *
 
 
 DEBUG = False
-ALLOWED_HOSTS = ['api.chalkmates.com', 'graph.chalkmates.com', 'playground.chalkmates.com',
-                 'api.yucampus.com', 'graph.yucampus.com', 'playground.yucampus.com']
+# ALLOWED_HOSTS = ['api.chalkmates.com', 'graph.chalkmates.com', 'playground.chalkmates.com',
+#                  'api.yucampus.com', 'graph.yucampus.com', 'playground.yucampus.com']
+ALLOWED_HOSTS=['*']
 
 # 3rd party apps
 THIRD_PARTY_APPS = ['corsheaders']

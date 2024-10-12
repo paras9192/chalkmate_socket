@@ -1,7 +1,8 @@
 from .base import *
 
 DEBUG = False
-ALLOWED_HOSTS = ['.chalkmates.com']
+# ALLOWED_HOSTS = ['.chalkmates.com']
+ALLOWED_HOSTS=['*']
 
 # 3rd party apps
 THIRD_PARTY_APPS = ['corsheaders']
