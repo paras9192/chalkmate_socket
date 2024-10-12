@@ -110,6 +110,7 @@ class ChatConsumer(WebsocketConsumer):
     
 
     def handle_new_message(self, data_json):
+        print("hi new message")
         async_to_sync(self.channel_layer.group_send)(
         f"channel_chat_{data_json['channel_id']}",
         {
