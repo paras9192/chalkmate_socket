@@ -12,10 +12,10 @@ INSTALLED_APPS += THIRD_PARTY_APPS
 MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware', *MIDDLEWARE]
 
 # cors
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r'^https?:\/\/(.*\.)?((chalkmates-staging\.s3-website\.ap-south-1\.amazonaws\.com)|(chalkmates\.com(\:\d+)?))\/?$'
-]
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r'^https?:\/\/(.*\.)?((chalkmates-staging\.s3-website\.ap-south-1\.amazonaws\.com)|(chalkmates\.com(\:\d+)?))\/?$'
+# ]
 
 # media
 MEDIA_URL = '/media/'
