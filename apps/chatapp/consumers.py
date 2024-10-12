@@ -118,6 +118,7 @@ class ChatConsumer(WebsocketConsumer):
         }
     )
         response = self.call_get_subscription_api(data_json['channel_id'])
+        print(response)
         for recipient in response['data']:
             recipient_id_str = str(recipient['recipient'])
         
