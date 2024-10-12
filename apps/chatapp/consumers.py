@@ -15,9 +15,9 @@ class ChatConsumer(WebsocketConsumer):
         api_password = params_dict.get("api_password")
         user_id = params_dict.get("user_id")
         
-        if not self.authenticate(api_key, api_password):
-            self.close(code=4001)  
-            return
+        # if not self.authenticate(api_key, api_password):
+        #     self.close(code=4001)  
+        #     return
         response=self.call_channel_subscription_api(user_id)
         personal_group_name = f"user_notifications_{user_id}"
         async_to_sync(self.channel_layer.group_add)(
