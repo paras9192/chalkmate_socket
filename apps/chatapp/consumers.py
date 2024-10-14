@@ -19,23 +19,23 @@ class ChatConsumer(WebsocketConsumer):
         # if not self.authenticate(api_key, api_password):
         #     self.close(code=4001)  
         #     return
-        response=self.call_channel_subscription_api(user_id)
-        print(response)
+        # response=self.call_channel_subscription_api(user_id)
+        # print(response)
         personal_group_name = f"user_notifications_{user_id}"
         async_to_sync(self.channel_layer.group_add)(
             personal_group_name,
             self.channel_name
         )
-        async_to_sync(self.channel_layer.group_send)(
-            personal_group_name,
-            {
-                'type': 'send_dm_list',
-                'message': {
-                    "event":"send_dm_list",
-                    "data": response['data'] 
-                }  
-            }
-        )
+        # async_to_sync(self.channel_layer.group_send)(
+        #     personal_group_name,
+        #     {
+        #         'type': 'send_dm_list',
+        #         'message': {
+        #             "event":"send_dm_list",
+        #             "data": response['data'] 
+        #         }  
+        #     }
+        # )
         print('hi i am connected ')
         self.accept()
     def disconnect(self, code):
