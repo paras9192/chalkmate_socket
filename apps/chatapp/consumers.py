@@ -16,26 +16,26 @@ class ChatConsumer(WebsocketConsumer):
         api_password = params_dict.get("api_password")
         user_id = params_dict.get("user_id")
         
-        # if not self.authenticate(api_key, api_password):
-        #     self.close(code=4001)  
-        #     return
-        # response=self.call_channel_subscription_api(user_id)
-        # print(response)
+        if not self.authenticate(api_key, api_password):
+            self.close(code=4001)  
+            return
+        response=self.call_channel_subscription_api(user_id)
+        print(response)
         personal_group_name = f"user_notifications_{user_id}"
         async_to_sync(self.channel_layer.group_add)(
             personal_group_name,
             self.channel_name
         )
-        # async_to_sync(self.channel_layer.group_send)(
-        #     personal_group_name,
-        #     {
-        #         'type': 'send_dm_list',
-        #         'message': {
-        #             "event":"send_dm_list",
-        #             "data": response['data'] 
-        #         }  
-        #     }
-        # )
+        async_to_sync(self.channel_layer.group_send)(
+            personal_group_name,
+            {
+                'type': 'send_dm_list',
+                'message': {
+                    "event":"send_dm_list",
+                    "data": response['data'] 
+                }  
+            }
+        )
         print('hi i am connected ')
         self.accept()
     def disconnect(self, code):
@@ -57,6 +57,7 @@ class ChatConsumer(WebsocketConsumer):
             return False
 
     def receive(self, text_data):
+        print(data_json)
         data_json = json.loads(text_data)
         if data_json.get("event") == "update_message":
 
