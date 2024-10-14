@@ -6,8 +6,8 @@ import base64
 from apps.accounts.models import User
 import requests
 from django.conf import settings
-
-class ChatConsumer(WebsocketConsumer):
+from channels.generic.websocket import AsyncWebsocketConsumer
+class ChatConsumer(AsyncWebsocketConsumer):
     # def connect(self):
     #     print('Connecting...')
     #     query_params = self.scope["query_string"].decode("utf-8").split("&")
@@ -52,7 +52,7 @@ class ChatConsumer(WebsocketConsumer):
     #     self.accept()
     # print('Connection accepted.')
 
-    def connect(self):
+    async def connect(self):
         print('hi')
         query_params = self.scope["query_string"].decode("utf-8").split("&")
         params_dict = dict(param.split("=", 1) for param in query_params if "=" in param)
@@ -60,17 +60,17 @@ class ChatConsumer(WebsocketConsumer):
         api_password = params_dict.get("api_password")
         user_id = params_dict.get("user_id")
         
-        if not self.authenticate(api_key, api_password):
+        if not await self.authenticate(api_key, api_password):
             self.close(code=4001)  
             return
-        response=self.call_channel_subscription_api(user_id)
+        response=await self.call_channel_subscription_api(user_id)
         print(response)
         personal_group_name = f"user_notifications_{user_id}"
-        async_to_sync(self.channel_layer.group_add)(
+        await async_to_sync(self.channel_layer.group_add)(
             personal_group_name,
             self.channel_name
         )
-        async_to_sync(self.channel_layer.group_send)(
+        await async_to_sync(self.channel_layer.group_send)(
             personal_group_name,
             {
                 'type': 'send_dm_list',
