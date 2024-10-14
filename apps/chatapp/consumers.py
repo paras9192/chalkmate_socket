@@ -9,6 +9,50 @@ from django.conf import settings
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
+        print('Connecting...')
+        query_params = self.scope["query_string"].decode("utf-8").split("&")
+        params_dict = dict(param.split("=", 1) for param in query_params if "=" in param)
+        api_key = params_dict.get("api_key")
+        api_password = params_dict.get("api_password")
+        user_id = params_dict.get("user_id")
+
+        if not self.authenticate(api_key, api_password):
+            print('Authentication failed.')
+            self.close(code=4001)  
+            return
+
+        print('Authenticated successfully.')
+        response = self.call_channel_subscription_api(user_id)
+    
+        if not response or 'data' not in response:  # Check if response is empty or does not have 'data'
+            print('Failed to call channel subscription API or no data returned.')
+            self.close(code=4002)
+            return
+
+        print('API call successful, response:', response)
+        personal_group_name = f"user_notifications_{user_id}"
+
+        async_to_sync(self.channel_layer.group_add)(
+        personal_group_name,
+        self.channel_name
+    )
+    
+        async_to_sync(self.channel_layer.group_send)(
+        personal_group_name,
+        {
+            'type': 'send_dm_list',
+            'message': {
+                "event": "send_dm_list",
+                "data": response['data'] 
+            }  
+        }
+    )
+    
+        print('User added to group:', personal_group_name)
+        self.accept()
+        print('Connection accepted.')
+
+    # def connect(self):
         print('hi')
         query_params = self.scope["query_string"].decode("utf-8").split("&")
         params_dict = dict(param.split("=", 1) for param in query_params if "=" in param)
