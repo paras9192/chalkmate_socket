@@ -9,6 +9,7 @@ from django.conf import settings
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
+        print('hi')
         query_params = self.scope["query_string"].decode("utf-8").split("&")
         params_dict = dict(param.split("=", 1) for param in query_params if "=" in param)
         api_key = params_dict.get("api_key")
@@ -19,6 +20,7 @@ class ChatConsumer(WebsocketConsumer):
         #     self.close(code=4001)  
         #     return
         response=self.call_channel_subscription_api(user_id)
+        print(response)
         personal_group_name = f"user_notifications_{user_id}"
         async_to_sync(self.channel_layer.group_add)(
             personal_group_name,
@@ -34,6 +36,7 @@ class ChatConsumer(WebsocketConsumer):
                 }  
             }
         )
+        print('hi i am connected ')
         self.accept()
     def disconnect(self, code):
         if hasattr(self, 'room_group_name'):
