@@ -155,23 +155,18 @@ class ChatConsumer(WebsocketConsumer):
                 except Exception as e:
                     self.send_error_message(personal_group_name, f"Error calling channel subscription API for recipient {recipient_id_str}: {e}")
                     continue
-                if recipient_id_str == str(data_json['sender_id']):
-                    continue
-
-                async_to_sync(self.channel_layer.group_add)(
-                personal_group_name,
-                self.channel_name
-            )
-                async_to_sync(self.channel_layer.group_send)(
-                personal_group_name,
-                {
+                if recipient_id_str != str(data_json['sender_id']):
+                    personal_group_name = f"user_notifications_{recipient_id_str}"
+                    async_to_sync(self.channel_layer.group_send)(
+                    personal_group_name,
+                    {
                     'type': 'send_dm_list',
                     'message': {
                         "event": "send_dm_list",
                         "data": recipient_subscription_response['data']
+                        }
                     }
-                }
-            )
+                )
             except Exception as e:
                 self.send_error_message(personal_group_name, f"Error processing recipient {recipient_id_str}: {e}")
                 continue 
