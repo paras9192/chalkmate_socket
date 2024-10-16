@@ -7,70 +7,26 @@ from apps.accounts.models import User
 import requests
 from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer
-class ChatConsumer(AsyncWebsocketConsumer):
-    # def connect(self):
-    #     print('Connecting...')
-    #     query_params = self.scope["query_string"].decode("utf-8").split("&")
-    #     params_dict = dict(param.split("=", 1) for param in query_params if "=" in param)
-    #     api_key = params_dict.get("api_key")
-    #     api_password = params_dict.get("api_password")
-    #     user_id = params_dict.get("user_id")
+class ChatConsumer(WebsocketConsumer):
 
-    #     if not self.authenticate(api_key, api_password):
-    #         print('Authentication failed.')
-    #         self.close(code=4001)  
-    #         return
-
-    #     print('Authenticated successfully.')
-    #     response = self.call_channel_subscription_api(user_id)
-    
-    #     if not response or 'data' not in response:  # Check if response is empty or does not have 'data'
-    #         print('Failed to call channel subscription API or no data returned.')
-    #         self.close(code=4002)
-    #         return
-
-    #     print('API call successful, response:', response)
-    #     personal_group_name = f"user_notifications_{user_id}"
-
-    #     async_to_sync(self.channel_layer.group_add)(
-    #     personal_group_name,
-    #     self.channel_name
-    # )
-    
-    #     async_to_sync(self.channel_layer.group_send)(
-    #     personal_group_name,
-    #     {
-    #         'type': 'send_dm_list',
-    #         'message': {
-    #             "event": "send_dm_list",
-    #             "data": response['data'] 
-    #         }  
-    #     }
-    # )
-    
-    #     print('User added to group:', personal_group_name)
-    #     self.accept()
-    # print('Connection accepted.')
-
-    async def connect(self):
-        print('hi')
+    def connect(self):
         query_params = self.scope["query_string"].decode("utf-8").split("&")
         params_dict = dict(param.split("=", 1) for param in query_params if "=" in param)
         api_key = params_dict.get("api_key")
         api_password = params_dict.get("api_password")
         user_id = params_dict.get("user_id")
+        recipient_id_str = str(user_id)
         
-        if not await self.authenticate(api_key, api_password):
+        if not self.authenticate(api_key, api_password):
             self.close(code=4001)  
             return
-        response=await self.call_channel_subscription_api(user_id)
-        print(response)
-        personal_group_name = f"user_notifications_{user_id}"
-        await async_to_sync(self.channel_layer.group_add)(
+        response=self.call_channel_subscription_api(user_id)
+        personal_group_name = f"user_notifications_{recipient_id_str}"
+        async_to_sync(self.channel_layer.group_add)(
             personal_group_name,
             self.channel_name
         )
-        await async_to_sync(self.channel_layer.group_send)(
+        async_to_sync(self.channel_layer.group_send)(
             personal_group_name,
             {
                 'type': 'send_dm_list',
@@ -80,7 +36,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }  
             }
         )
-        print('hi i am connected ')
         self.accept()
     def disconnect(self, code):
         if hasattr(self, 'room_group_name'):
@@ -101,7 +56,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return False
 
     def receive(self, text_data):
-        print(data_json)
+
         data_json = json.loads(text_data)
         if data_json.get("event") == "update_message":
 
@@ -118,14 +73,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             self.handle_new_message(data_json)
     def handle_message_update(self, data_json):
-    
-        message_data = data_json.get("message", {})
-        message_id = message_data.get("msg_id") 
-        updated_message = message_data.get("content")  
+        message_id = data_json.get("msg_id") 
+        updated_message = data_json.get("content")  
         channel_id = data_json.get("channel_id")
+        user_id=data_json.get("user_id")
         if not message_id or not updated_message:
             return
-
+        update_response = self.update_message_backend(channel_id, message_id,updated_message)
         response = self.call_get_subscription_api(channel_id)
         for recipient in response['data']:
             recipient_id_str = str(recipient['recipient'])
@@ -137,65 +91,90 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "update_message",
                 "message": "messsage updated successfully",
                 "channel_id": data_json['channel_id'],
-                "message_data": updated_message,
+                "message_data": update_response['data'],
             })
             response=self.call_channel_subscription_api(recipient_id_str)
-            personal_group_name = f"user_notifications_{recipient_id_str}"
-            async_to_sync(self.channel_layer.group_add)(
-            personal_group_name,
-            self.channel_name
-        )
-            async_to_sync(self.channel_layer.group_send)(
-            personal_group_name,
-            {
-                'type': 'send_dm_list',
-                'message': {
+            if recipient_id_str != str(user_id):
+                personal_group_name = f"user_notifications_{recipient_id_str}"
+            #     async_to_sync(self.channel_layer.group_add)(
+            #     personal_group_name,
+            #     self.channel_name
+            # )
+                async_to_sync(self.channel_layer.group_send)(
+                personal_group_name,
+                {
+                    'type': 'send_dm_list',
+                    'message': {
                     "event":"send_dm_list",
                     "data": response['data'] 
-                }  
-            }
-        )
+                    }  
+                }
+            )
     
-
     def handle_new_message(self, data_json):
-        print("hi new message")
-        async_to_sync(self.channel_layer.group_send)(
-        f"channel_chat_{data_json['channel_id']}",
-        {
-            "type": "chat_message",
-            "message_data": data_json,
-        }
-    )
-        response = self.call_get_subscription_api(data_json['channel_id'])
-        print(response)
-        for recipient in response['data']:
-            recipient_id_str = str(recipient['recipient'])
-        
-            personal_group_name = f"user_notifications_{recipient_id_str}"
+        try:
             async_to_sync(self.channel_layer.group_send)(
-            personal_group_name,
+            f"channel_chat_{data_json['channel_id']}",
             {
-                "type": "new_message_received",
-                "message": "sent you a message",
-                "channel_id": data_json['channel_id'],
+                "type": "chat_message",
                 "message_data": data_json,
-            })
-            response=self.call_channel_subscription_api(recipient_id_str)
-            personal_group_name = f"user_notifications_{recipient_id_str}"
-            async_to_sync(self.channel_layer.group_add)(
-            personal_group_name,
-            self.channel_name
-        )
-            async_to_sync(self.channel_layer.group_send)(
-            personal_group_name,
-            {
-                'type': 'send_dm_list',
-                'message': {
-                    "event":"send_dm_list",
-                    "data": response['data'] 
-                }  
             }
         )
+        except Exception as e:
+            self.send_error_message(self.channel_name, f"Error sending message to group: {e}")
+            return 
+
+        try:
+            response = self.call_get_subscription_api(data_json['channel_id'])
+        except Exception as e:
+            self.send_error_message(self.channel_name, f"Error calling subscription API: {e}")
+            return  
+
+        try:
+      
+            response_message = self.create_message(data_json['channel_id'], data_json['message'], data_json['sender_id'])
+        except Exception as e:
+            self.send_error_message(self.channel_name, f"Error creating message: {e}")
+            return 
+
+        for recipient in response['data']:
+            try:
+                recipient_id_str = str(recipient['recipient'])
+                personal_group_name = f"user_notifications_{recipient_id_str}"
+                async_to_sync(self.channel_layer.group_send)(
+                personal_group_name,
+                {
+                    "type": "new_message_received",
+                    "message": "sent you a message",
+                    "channel_id": data_json['channel_id'],
+                    "message_data": response_message,
+                }
+            )
+                try:
+                    recipient_subscription_response = self.call_channel_subscription_api(recipient_id_str)
+                except Exception as e:
+                    self.send_error_message(personal_group_name, f"Error calling channel subscription API for recipient {recipient_id_str}: {e}")
+                    continue
+                if recipient_id_str == str(data_json['sender_id']):
+                    continue
+
+                async_to_sync(self.channel_layer.group_add)(
+                personal_group_name,
+                self.channel_name
+            )
+                async_to_sync(self.channel_layer.group_send)(
+                personal_group_name,
+                {
+                    'type': 'send_dm_list',
+                    'message': {
+                        "event": "send_dm_list",
+                        "data": recipient_subscription_response['data']
+                    }
+                }
+            )
+            except Exception as e:
+                self.send_error_message(personal_group_name, f"Error processing recipient {recipient_id_str}: {e}")
+                continue 
     
 
     def update_message(self, event):
@@ -205,6 +184,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
         self.send(
             text_data=json.dumps({
+                "event":"update_message",
                 "message": event["message"],
                 "channel_id": event["channel_id"],
                 "message_data": event["message_data"]
@@ -224,35 +204,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
         self.send(
             text_data=json.dumps({
+                "event":"chat_message",
                 "message": event["message"],
                 "channel_id": event["channel_id"],
                 "message_data": event["message_data"]
             })
-        )
-    
-        
-    # def subscribe_to_user_channels(self):
-    #     """
-    #     Subscribe the user to all channels they are a part of.
-    #     This method assumes that a user can be subscribed to multiple channels like DMs or group chats.
-    #     """
-    #     # Get all channels that the user is subscribed to
-
-    #     for subscription in user_channels:
-    #         room_group_name = f"channel_chat_{subscription.channel.id}"
-
-    #         # Subscribe the user to each channel (group)
-    #         async_to_sync(self.channel_layer.group_add)(
-    #             room_group_name,
-    #             self.channel_name
-    #         )
-        
-        
-        
-        
-        
-        
-        
+        )     
         
     def call_channel_subscription_api(self, user_id):
         # Define the base URL for your API
@@ -284,7 +241,54 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except requests.exceptions.RequestException as e:
             print(f"Error while calling channel subscription API: {e}")
         
+    
+    def create_message(self,channel_id, message, sender):
+        base_url = settings.BACKEND_SERVER_URL
+        endpoint = f"{base_url}/api/v1/messages/"
+    
+        payload = {
+        "channel_id": channel_id,
+        "message": message,
+        "sender": sender
+    }
+        try:
+            response = requests.post(endpoint, json=payload)
         
+            if response.status_code == 200:
+                json_response = response.json()
+                return json_response
+            else:
+                print(f"Failed to create message: {response.status_code}, {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error while calling message creation API: {e}")
+            
+    def update_message_backend(self,channel_id, message_id, content):
+        base_url = settings.BACKEND_SERVER_URL
+        endpoint = f"{base_url}/api/v1/store_msg/update-msg/?channel_id={channel_id}"
+    
+        payload = {
+       "msg_id": message_id,
+       "content":content
+       }
+        try:
+            response = requests.put(endpoint, json=payload)
+        
+            if response.status_code == 200:
+                json_response = response.json()
+                return json_response
+            else:
+                print(f"Failed to create message: {response.status_code}, {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error while calling message creation API: {e}")
+
+        
+    def send_error_message(self, channel_name, message):
+        error_message = {
+        "type": "error",
+        "message": message,
+    }
+        async_to_sync(self.channel_layer.send)(channel_name, error_message)
+
         
         
 
