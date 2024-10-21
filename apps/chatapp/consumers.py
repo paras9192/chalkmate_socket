@@ -218,7 +218,6 @@ class ChatConsumer(WebsocketConsumer):
         This method handles the delete message event.
         It sends the delete message data to the WebSocket client.
         """
-        print("i am event",event)
         self.send(
             text_data=json.dumps({
                 
