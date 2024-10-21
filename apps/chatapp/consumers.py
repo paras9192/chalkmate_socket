@@ -62,6 +62,10 @@ class ChatConsumer(WebsocketConsumer):
 
             # Handle message update
             self.handle_message_update(data_json)
+        if data_json.get("event") == "delete_channel":
+            self.handle_delete_channel(data_json)
+        # if data_json.get("event") == "error_message":
+        #     self.handle_send_error_message(data_json)
         else:
             # Handle new message or file
             if "file_base64" in data_json:
@@ -185,6 +189,44 @@ class ChatConsumer(WebsocketConsumer):
                 "message_data": event["message_data"]
             })
         )
+    def handle_delete_channel(self,data_json):
+        channel_id = data_json.get("channel_id")
+        token = data_json.get("token")
+        user_id = str(data_json.get("user_id"))
+        personal_group_name = f"user_notifications_{user_id}"
+        try:
+            response = self.call_get_subscription_api(channel_id)
+        except Exception as e:
+            self.send_error_message(personal_group_name, "Error calling subscription API")
+            return  
+
+        for recipient in response['data']:
+            recipient_id_str = str(recipient['recipient'])
+            personal_group_name = f"user_notifications_{recipient_id_str}"
+            async_to_sync(self.channel_layer.group_send)(
+                personal_group_name,
+                {
+                    "type": "delete_channel",
+                    "message": "Channel deleted successfully",
+                    "channel_id": data_json['channel_id'],
+                }
+            )
+        response=self.call_delete_channel(channel_id,token)
+        
+    def delete_channel(self, event):
+        """
+        This method handles the delete message event.
+        It sends the delete message data to the WebSocket client.
+        """
+        print("i am event",event)
+        self.send(
+            text_data=json.dumps({
+                
+                "event":"delete_channel",
+                "channel_id": event["channel_id"],
+            })
+        )
+
     def send_dm_list(self, event):
         message = event['message']
         
@@ -232,9 +274,9 @@ class ChatConsumer(WebsocketConsumer):
                 json_response = response.json()
                 return json_response
             else:
-                print(f"Failed to subscribe: {response.status_code}, {response.text}")
+                (f"Failed to subscribe: {response.status_code}, {response.text}")
         except requests.exceptions.RequestException as e:
-            print(f"Error while calling channel subscription API: {e}")
+            (f"Error while calling channel subscription API: {e}")
         
     
     def create_message(self,channel_id, message, sender):
@@ -275,8 +317,42 @@ class ChatConsumer(WebsocketConsumer):
                 print(f"Failed to create message: {response.status_code}, {response.text}")
         except requests.exceptions.RequestException as e:
             print(f"Error while calling message creation API: {e}")
-
+            
+    def call_delete_channel(self,channel_id,token):
+        base_url = settings.BACKEND_SERVER_URL
+        endpoint = f"{base_url}/api/v1/chat/channels/{channel_id}/"
+        headers = {
+            'Authorization': f'token {token}'
+        }
         
+        try:
+            response = requests.delete(endpoint,headers=headers)
+            if response.status_code == 204:
+                return "Channel deleted successfully"
+            else:
+                return response
+        except requests.exceptions.RequestException as e:
+            print(f"Error while calling channel deletion API: {e}")
+
+    # def send_error_message(self, event):
+    #     self.send(
+    #         text_data=json.dumps({
+                
+    #             "event":"error",
+    #             "message": event["message"],
+    #         })
+    #     )
+    # def handle_send_error_message(self,message):
+    #     """
+    #     Handle'send_error_message' type messages.
+    #     Send the error message to the WebSocket client.
+    #     """
+    #     self.send(
+    #         text_data=json.dumps({
+    #             "event":"error",
+    #             "message": message,
+    #         })
+    #     )
     def send_error_message(self, channel_name, message):
         error_message = {
         "type": "error",
@@ -285,8 +361,6 @@ class ChatConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.send)(channel_name, error_message)
 
         
-        
-
         
         
         
