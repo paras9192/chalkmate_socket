@@ -59,7 +59,7 @@ class ChatConsumer(WebsocketConsumer):
 
         data_json = json.loads(text_data)
         print(data_json)
-        if data_json.get("event") == "update_message":
+        if data_json.get("event") == "update_messages":
             self.handle_message_update(data_json)
         # elif data_json.get("event") == "delete_channel":
         #     self.handle_delete_channel(data_json)
