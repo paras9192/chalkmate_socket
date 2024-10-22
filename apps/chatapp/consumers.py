@@ -111,17 +111,17 @@ class ChatConsumer(WebsocketConsumer):
                     }  
                 }
             )
-    def message_update(self, event):
+    def update_message(self, event):
         """
         This method handles the updated message event.
         It sends the updated message data to the WebSocket client.
         """
         self.send(
             text_data=json.dumps({
-                "event":"update_message",
+                "event": "update_message",
                 "message": event.get("message", ""),
-            "channel_id": event.get("channel_id", ""),
-            "message_data": event.get("message_data", {})
+                "channel_id": event.get("channel_id", ""),
+                "message_data": event.get("message_data", {})
             })
         )
     
