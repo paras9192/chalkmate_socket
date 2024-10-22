@@ -59,10 +59,8 @@ class ChatConsumer(WebsocketConsumer):
 
         data_json = json.loads(text_data)
         if data_json.get("event") == "update_message":
-
-            # Handle message update
             self.handle_message_update(data_json)
-        if data_json.get("event") == "delete_channel":
+        elif data_json.get("event") == "delete_channel":
             self.handle_delete_channel(data_json)
         # if data_json.get("event") == "error_message":
         #     self.handle_send_error_message(data_json)
@@ -114,6 +112,19 @@ class ChatConsumer(WebsocketConsumer):
                     }  
                 }
             )
+    def message_update(self, event):
+        """
+        This method handles the updated message event.
+        It sends the updated message data to the WebSocket client.
+        """
+        self.send(
+            text_data=json.dumps({
+                "event":"update_message",
+                "message": event.get("message", ""),
+            "channel_id": event.get("channel_id", ""),
+            "message_data": event.get("message_data", {})
+            })
+        )
     
     def handle_new_message(self, data_json):
         try:
@@ -176,19 +187,7 @@ class ChatConsumer(WebsocketConsumer):
                 continue 
     
 
-    def update_message(self, event):
-        """
-        This method handles the updated message event.
-        It sends the updated message data to the WebSocket client.
-        """
-        self.send(
-            text_data=json.dumps({
-                "event":"update_message",
-                "message": event["message"],
-                "channel_id": event["channel_id"],
-                "message_data": event["message_data"]
-            })
-        )
+    
     def handle_delete_channel(self,data_json):
         channel_id = data_json.get("channel_id")
         token = data_json.get("token")
