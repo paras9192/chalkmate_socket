@@ -58,6 +58,7 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
 
         data_json = json.loads(text_data)
+        print(data_json)
         if data_json.get("event") == "update_message":
             self.handle_message_update(data_json)
         # elif data_json.get("event") == "delete_channel":
@@ -75,6 +76,7 @@ class ChatConsumer(WebsocketConsumer):
 
             self.handle_new_message(data_json)
     def handle_message_update(self, data_json):
+        print('hi i am inside the update')
         message_id = data_json.get("msg_id") 
         updated_message = data_json.get("content")  
         channel_id = data_json.get("channel_id")
