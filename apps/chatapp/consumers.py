@@ -59,13 +59,13 @@ class ChatConsumer(WebsocketConsumer):
 
         data_json = json.loads(text_data)
         print(data_json)
-        if data_json.get("event") == "update_messages":
+        if data_json.get("event") == "update_message":
             self.handle_message_update(data_json)
-        # elif data_json.get("event") == "delete_channel":
-        #     self.handle_delete_channel(data_json)
+        elif data_json.get("event") == "delete_channel":
+            self.delete_channel_handle(data_json)
         # if data_json.get("event") == "error_message":
         #     self.handle_send_error_message(data_json)
-        else:
+        elif data_json.get("event") == "chat_message":
             # Handle new message or file
             if "file_base64" in data_json:
                 file_str = data_json["file_base64"]
@@ -100,10 +100,7 @@ class ChatConsumer(WebsocketConsumer):
             response=self.call_channel_subscription_api(recipient_id_str)
             if recipient_id_str != str(user_id):
                 personal_group_name = f"user_notifications_{recipient_id_str}"
-            #     async_to_sync(self.channel_layer.group_add)(
-            #     personal_group_name,
-            #     self.channel_name
-            # )
+
                 async_to_sync(self.channel_layer.group_send)(
                 personal_group_name,
                 {
@@ -129,6 +126,7 @@ class ChatConsumer(WebsocketConsumer):
         )
     
     def handle_new_message(self, data_json):
+        print('i am in new message')
         try:
             async_to_sync(self.channel_layer.group_send)(
             f"channel_chat_{data_json['channel_id']}",
@@ -190,7 +188,7 @@ class ChatConsumer(WebsocketConsumer):
     
 
     
-    def handle_delete_channel(self,data_json):
+    def delete_channel_handle(self,data_json):
         channel_id = data_json.get("channel_id")
         token = data_json.get("token")
         user_id = str(data_json.get("user_id"))
